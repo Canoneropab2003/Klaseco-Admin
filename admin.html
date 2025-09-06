@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Klaseco — Admin Dashboard (RFID)</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <!-- Header (sticky) -->
+  <header class="header glass">
+  <div class="header-left">
+    <span class="logo" aria-hidden="true"><i class="fa-solid fa-chalkboard"></i></span>
+    <h1>Klaseco <span class="subtitle">Admin Dashboard</span></h1>
+  </div>
+
+ <div class="header-right">
+  <!-- Notifications bell -->
+  <button class="icon-btn notif-btn" id="notifBtn" aria-label="Notifications">
+    <i class="fa-solid fa-bell"></i>
+    <span class="dot" aria-hidden="true"></span>
+  </button>
+
+  <!-- Clock -->
+  <div id="clock"></div>
+</div>
+
+</header>
+
+<!-- Notifications Dropdown -->
+<div id="notifDropdown" class="notif-dropdown glass">
+  <div class="notif-header">Notifications</div>
+  <ul id="notifList"></ul>
+  <div class="notif-footer">
+    <button id="clearNotifs" class="btn">Clear</button>
+  </div>
+</div>
+
+  <div class="app">
+    <!-- Sidebar (sticky) -->
+    <aside class="sidebar glass">
+      <nav>
+        <button class="nav-btn active" data-panel="panel-dashboard"><i class="fa-solid fa-grip"></i> Dashboard</button>
+        <button class="nav-btn" data-panel="panel-attendance"><i class="fa-solid fa-clipboard-list"></i> Attendance</button>
+        <button class="nav-btn" data-panel="panel-teachers"><i class="fa-solid fa-users-gear"></i> Teachers</button>
+        <button class="nav-btn" data-panel="panel-devices"><i class="fa-solid fa-toggle-on"></i> Devices</button>
+        <button class="nav-btn" data-panel="panel-energy"><i class="fa-solid fa-bolt"></i> Energy</button>
+        <button class="nav-btn" data-panel="panel-logs"><i class="fa-solid fa-clock-rotate-left"></i> System Logs</button>
+      </nav>
+      <div class="sidebar-footer">
+      <footer class="sidebar-footer">
+          <button id="logoutBtn" class="btn danger logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </button>
+      </footer>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section id="panel-dashboard" class="panel glass visible">
+        <h2 class="panel-title"><i class="fa-solid fa-grip"></i> Overview</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="card-top">
+              <span class="card-icon bg-blue"><i class="fa-solid fa-user-check"></i></span>
+              <span class="card-label">Present Today</span>
+            </div>
+            <div class="card-value" id="kpiPresent">0</div>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <span class="card-icon bg-green"><i class="fa-solid fa-right-to-bracket"></i></span>
+              <span class="card-label">Time-ins Today</span>
+            </div>
+            <div class="card-value" id="kpiTimeIns">0</div>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <span class="card-icon bg-amber"><i class="fa-solid fa-power-off"></i></span>
+              <span class="card-label">Devices ON</span>
+            </div>
+            <div class="card-value" id="kpiDevicesOn">0</div>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <span class="card-icon bg-purple"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+              <span class="card-label">Auto Mode</span>
+            </div>
+            <div class="card-value" id="kpiAutoMode">Off</div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button id="qaAllOff" class="btn danger"><i class="fa-solid fa-plug-circle-minus"></i> Turn OFF All Devices</button>
+          <button id="qaAutoMode" class="btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Toggle Auto Mode</button>
+          <button id="qaExportToday" class="btn"><i class="fa-solid fa-file-arrow-down"></i> Export Today (CSV)</button>
+        </div>
+      </section>
+
+      <!-- ATTENDANCE -->
+      <section id="panel-attendance" class="panel glass">
+        <h2 class="panel-title"><i class="fa-solid fa-clipboard-list"></i> Attendance (RFID)</h2>
+        <div class="filters">
+          <div class="field">
+            <label for="attDate"><i class="fa-regular fa-calendar"></i> Date</label>
+            <select id="attDate"></select>
+          </div>
+          <div class="field">
+            <label for="attTeacher"><i class="fa-solid fa-user-tie"></i> Teacher</label>
+            <select id="attTeacher"></select>
+          </div>
+          <div class="field grow">
+            <label for="attSearch"><i class="fa-solid fa-magnifying-glass"></i> Search</label>
+            <input id="attSearch" type="text" placeholder="Search name or status…" />
+          </div>
+          <div class="actions">
+            <button id="attReset" class="btn"><i class="fa-solid fa-rotate"></i> Reset</button>
+            <button id="attExport" class="btn primary"><i class="fa-solid fa-file-arrow-down"></i> Export CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="attTable">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Teacher</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody><!-- rows --></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TEACHERS -->
+      <section id="panel-teachers" class="panel glass">
+        <h2 class="panel-title"><i class="fa-solid fa-users-gear"></i> Manage Teachers</h2>
+        <div class="teacher-form">
+          <div class="field">
+            <label for="tId"><i class="fa-solid fa-id-card"></i> Teacher ID</label>
+            <input id="tId" type="text" placeholder="8-digit RFID ID" />
+          </div>
+          <div class="field grow">
+            <label for="tName"><i class="fa-solid fa-user"></i> Name</label>
+            <input id="tName" type="text" placeholder="e.g., Mr. Santos" />
+          </div>
+          <div class="actions">
+            <button id="tSave" class="btn primary"><i class="fa-solid fa-floppy-disk"></i> Add / Update</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table id="tTable">
+            <thead>
+              <tr>
+                <th>Teacher ID</th>
+                <th>Name</th>
+                <th class="center">Actions</th>
+              </tr>
+            </thead>
+            <tbody><!-- rows --></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DEVICES -->
+      <section id="panel-devices" class="panel glass">
+        <h2 class="panel-title"><i class="fa-solid fa-toggle-on"></i> Devices</h2>
+        <div class="device-grid">
+          <div class="device">
+            <div class="device-icon bg-blue"><i class="fa-solid fa-lightbulb"></i></div>
+            <div class="device-info">
+              <div class="device-name">Lights</div>
+              <div class="device-desc">Ceiling & ambient</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="devLights">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="device">
+            <div class="device-icon bg-amber"><i class="fa-solid fa-fan"></i></div>
+            <div class="device-info">
+              <div class="device-name">Fans</div>
+              <div class="device-desc">Electric fans</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="devFans">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="device">
+            <div class="device-icon bg-purple"><i class="fa-solid fa-snowflake"></i></div>
+            <div class="device-info">
+              <div class="device-name">Aircon</div>
+              <div class="device-desc">Cooling unit</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="devAc">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="device wide">
+            <div class="device-icon bg-green"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <div class="device-info">
+              <div class="device-name">Auto Mode</div>
+              <div class="device-desc">Use PIR/motion rules</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="devAuto">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENERGY -->
+      <section id="panel-energy" class="panel glass">
+        <h2 class="panel-title"><i class="fa-solid fa-bolt"></i> Energy</h2>
+        <div class="energy-wrap">
+          <div class="energy-legend">
+            <span class="dot blue"></span> Lights
+            <span class="dot amber"></span> Fans
+            <span class="dot purple"></span> Aircon
+          </div>
+          <div id="energyBars" class="energy-bars"><!-- bars injected --></div>
+        </div>
+        <p class="muted">* Demo chart using simple bars (no library). Update logic in <code>buildEnergyBars()</code>.</p>
+      </section>
+
+      <!-- LOGS -->
+      <section id="panel-logs" class="panel glass">
+        <h2 class="panel-title"><i class="fa-solid fa-clock-rotate-left"></i> System Logs</h2>
+        <div class="table-wrapper">
+          <table id="logTable">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody><!-- rows --></tbody>
+          </table>
+        </div>
+        <div class="panel-footer">
+          <button id="logsClear" class="btn danger"><i class="fa-solid fa-trash"></i> Clear Logs</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
